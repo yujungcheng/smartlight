@@ -26,9 +26,13 @@
 
     <!--  Fonts and icons     -->
     <link href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
-    <link href='https://fonts.googleapis.com/css?family=Muli:400,300' rel='stylesheet' type='text/css'>
     <link href="assets/css/themify-icons.css" rel="stylesheet">
-
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.43.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.43.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
 </head>
 <body>
 
@@ -42,8 +46,8 @@
 
     	<div class="sidebar-wrapper">
             <div class="logo">
-                <a href="http://www.creative-tim.com" class="simple-text">
-                    Creative Tim
+                <a>
+                    Street Light Management
                 </a>
             </div>
 
@@ -125,14 +129,12 @@
 
 		<div class="content">
             <div class="container-fluid">
-                <div class="card card-map">
 					<div class="header">
-                        <h4 class="title">Google Maps</h4>
+                        <h4 class="title">MappleBox Maps</h4>
                     </div>
-					<div class="map">
-						<div id="map"></div>
-					</div>
-				</div>
+
+						<div id='map'></div>
+
 			</div>
 		</div>
 
@@ -183,19 +185,57 @@
     <!--  Notifications Plugin    -->
     <script src="assets/js/bootstrap-notify.js"></script>
 
-    <!--  Google Maps Plugin    -->
-    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js"></script>
-
     <!-- Paper Dashboard Core javascript and methods for Demo purpose -->
 	<script src="assets/js/paper-dashboard.js"></script>
 
 	<!-- Paper Dashboard DEMO methods, don't include it in your project! -->
 	<script src="assets/js/demo.js"></script>
-
+    <!-- MappleBox Plugin -->
     <script>
-        $().ready(function(){
-            demo.initGoogleMaps();
-        });
+	mapboxgl.accessToken = 'pk.eyJ1Ijoiam9qbzEzNTcyMDAxIiwiYSI6ImNqY3NzbG1oMDB4M2YzMm5vZDhtMGtqMXMifQ.OvVuHvW58nx5LMz3FFlZMg';
+	var map = new mapboxgl.Map({
+	    container: 'map',
+	    style: 'mapbox://styles/mapbox/streets-v9',
+	    center: [121.5728163,25.0777304], // starting position [lng, lat]
+            zoom: 15 // starting zoom
+	});
+	map.on('load', function() {
+	    map.loadImage('https://s3-ap-northeast-1.amazonaws.com/streentlight/streetlight.png', function(error, image) {
+		if (error) throw error;
+		map.addImage('streetlight', image);
+		map.addLayer({
+		    "id": "points",
+		    "type": "symbol",
+		    "source": {
+		        "type": "geojson",
+		        "data": {
+		            "type": "FeatureCollection",
+		            "features": [{
+		                "type": "Feature",
+				"properties": {
+                        "description": "<h3>GPS 121.5728163,25.0777304</h3><video width=\"320\" autoplay controls><source src=\"https://www.mapbox.com/drone/video/drone.mp4\" type=\"video/mp4\"></video>",
+                        "icon": "theatre"
+                    },
+		                "geometry": {
+		                    "type": "Point",
+		                    "coordinates": [121.5728163,25.0777304]
+		                }
+		            }]
+		        }
+		    },
+		    "layout": {
+		        "icon-image": "streetlight",
+		        "icon-size": 0.5
+		    }
+		});
+		map.on('click', 'points', function (e) {
+		new mapboxgl.Popup()
+		    .setLngLat(e.features[0].geometry.coordinates)
+		    .setHTML(e.features[0].properties.description)
+		    .addTo(map);
+    		});
+	    });
+	});
     </script>
 
 </html>
